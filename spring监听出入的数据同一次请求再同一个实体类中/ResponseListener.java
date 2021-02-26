@@ -17,8 +17,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.lang.NonNull;
 
-import com.aacoptics.gateway.entity.SystemLog;
-import com.aacoptics.gateway.repository.SystemLogRepository;
+import com.test.gateway.entity.SystemLog;
+import com.test.gateway.repository.SystemLogRepository;
 
 import reactor.core.publisher.Mono;
 
@@ -30,13 +30,14 @@ import reactor.core.publisher.Mono;
  * @since jdk 1.8
  */
 public class ResponseListener extends ServerHttpResponseDecorator {
-
+	
+	//jpa
     private final SystemLog systemLog;
-
     private final SystemLogRepository systemLogRepository;
 
     public ResponseListener(ServerHttpResponse delegate, SystemLog systemLog, SystemLogRepository systemLogRepository) {
         super(delegate);
+		//jpa
         this.systemLog = systemLog;
         this.systemLogRepository = systemLogRepository;
     }
@@ -44,10 +45,12 @@ public class ResponseListener extends ServerHttpResponseDecorator {
     @Override
     public void beforeCommit(@NonNull Supplier<? extends Mono<Void>> action) {
         ServerHttpResponse serverHttpResponse = getDelegate();
+		//jpa
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         systemLog.setHttpStatusCode(String.valueOf(Objects.requireNonNull(serverHttpResponse.getStatusCode()).value()));
         systemLog.setReturnTime(df.format(LocalDateTime.now()));
         systemLogRepository.save(systemLog);
+		//网关拦截后返回
         super.beforeCommit(action);
     }
 
