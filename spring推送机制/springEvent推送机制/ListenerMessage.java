@@ -3,6 +3,11 @@ public class UserEventListener {
 
     @Autowired
     private ApplicationEventPublisher publisher;
+    @Autowired
+    private PlatformTransactionManager dataSourceTransactionManager;
+    @Autowired
+    private TransactionDefinition transactionDefinition;
+
 
     @Override
     @Transactional
