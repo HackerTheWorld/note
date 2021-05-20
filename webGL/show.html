@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="jquery-3.5.1/jquery-3.5.1.js"></script>
+    <script src="three.js-master/build/three.js"></script>
+    <script src="three.js-master/examples/js/controls/OrbitControls.js"></script>
+    <script src="three.js-master/examples/js/loaders/OBJLoader.js"></script>
+
+
+</head>
+
+<body>
+</body>
+<script>
+
+    //创建一个div,用来盛放渲染模型的canvas
+    var width = window.innerWidth || 2;
+    var height = window.innerHeight || 2;
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    var info = document.createElement('div');
+    info.style.position = 'absolute';
+    info.style.top = '30px';
+    info.style.width = '100%';
+    info.style.textAlign = 'center';
+    container.appendChild(info);
+
+
+    //帧动画事件，这个方法模型渲染是用到的必要方法，因为模型渲染的过程中是不断对canvas进行重绘。
+    var requestAnimationFrame = (function () {
+        return window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.oRequestAnimationFrame ||
+            window.msRequestAnimationFrame ||
+            function (callback) {
+                window.setTimeout(callback, 1000 / 60);
+            };
+    })();
+
+    var scene; //用来盛放模型的场景
+    var camera; //呈现模型的相机
+    var renderer; //渲染模型的渲染器
+    var control; //操作模型的控制器
+    var objLoader; //加载obj模型的加载器
+
+//场景内模型渲染准备
+function prepareRender() {
+	
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera( 70, width / height, 1, 10000000000 );
+    renderer = new THREE.WebGLRenderer();
+
+    renderer.autoClear = false;
+
+//初始化相机位置。
+    camera.position.x = 150;
+    camera.position.y = 150;
+    camera.position.z = 150;
+    renderer.setSize( width, height );
+    
+//将渲染画布放到dom元素中，即前面声明的div。
+    info.appendChild(renderer.domElement);
+
+//声明控制器，传入相机和被控制的dom节点。
+    control = new THREE.OrbitControls(camera, renderer.domElement.parentNode);
+
+//控制器在控制元素时围绕的中心位置。
+    control.target=new THREE.Vector3(0,0,0);
+
+//相机的朝向
+    camera.aspect = window.innerWidth / window.innerHeight;
+}
+
+//向场景内添加obj模型
+function insertObj() {
+		
+        //初始化OBJLoader加载器。
+            objLoader = new THREE.OBJLoader();
+    
+        //创建模型的纹理（贴图）加载器。
+            // var textureLoader = new THREE.TextureLoader();
+            // var texture = textureLoader.load( 'demo_jinyu.jpg' );
+    
+        //加载模型
+            objLoader.load( 'obj/M24_R_Low_Poly_Version_obj.obj',function ( object ) {
+    
+                    object.traverse( function ( child ) {
+                        
+                    // //将加载到的纹理给模型的材质
+                    //     if ( child instanceof THREE.Mesh ) {
+                    //         child.material.map = texture;
+                    //     }
+    
+                    } );
+    
+            //为了呈现更清晰。将模型放大20倍
+                    object.scale.set(20,20,20);
+    
+            //将模型的位置始终定位在中心点(0,0,0)
+            //这一步的操作是为了配合模型控制器的效果，前面的模型控制器就是中心点就是设置在(0,0,0)位置的。
+            //用户在用鼠标旋转模型时，好像在围绕着模型的中心旋转。
+                    var box = new THREE.Box3().setFromObject(object);
+                    var center = box.getCenter();//用一个Box获取到模型的当前位置。
+                    object.position.set(-center.x, -center.y, -center.z);//将模型移回原点。
+    
+    
+                    scene.add( object );
+                },
+                
+               //进度回调函数
+                function ( xhr ) {
+                    console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+                },
+               // called when loading has errors
+                function ( error ) {
+                    console.log( 'An error happened' );
+                }
+            );
+    
+        }
+//场景内添加灯
+function insertOther(){
+
+//环境光
+    var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+    scene.add( light );
+
+//方向光
+    var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+    scene.add( directionalLight );
+
+}
+function render() {
+        renderer.render(scene, camera);
+    }
+
+    function animate() {
+        control.update();
+        requestAnimationFrame( animate );
+        render();
+    }
+
+    function init() {
+        prepareRender();//变量声明，渲染准备工作
+        insertObj();//加载obj模型并加入到场景中
+        insertOther();//像场景中添加光。
+        animate();//动画
+    }
+	
+//调用代码
+	init();
+</script>
+
+</html>
