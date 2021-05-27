@@ -1,0 +1,18 @@
+map: 同步元素转换方法
+subscribe：异步方法 订阅事件 监听数据流的变化
+faltmap: 异步转换 可以转换Mono和Flux
+
+//创建异步流
+Flux<String> stringFlux = Flux.create(a -> a.next("aa"));
+//创建同步流
+Flux.push
+
+stringFlux.replay
+stringFlux.publish
+获取 ConnectableFlux
+doOnSubscribe 由 connect 触发
+只有在连接时候才会触发 订阅事件
+
+next 只获取第一个元素
+
+响应式编程只有在有消费情况下才会调用
