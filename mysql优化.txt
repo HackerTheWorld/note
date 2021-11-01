@@ -1,0 +1,4 @@
+mysql
+ STRAIGHT_JOIN 优化inner join 指定驱动表为左表。 
+ inner join 默认使用小表为驱动表。在where条件中查询中存在非索引字段会导致，有索引字段的表在连接时候索引失效。
+ 关联字段类型不一致，导致索引失效。
